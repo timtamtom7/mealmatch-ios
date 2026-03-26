@@ -10,11 +10,14 @@ struct RecipeDetailView: View {
                 // Hero Image
                 ZStack(alignment: .bottomLeading) {
                     Rectangle()
-                        .fill(LinearGradient(
-                            colors: [Color.mmPrimary, Color.mmPrimaryContainer],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
+                        .fill(
+                            LinearGradient(
+                                colors: [MMColor.primary, MMColor.primaryFixed],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+
                     Image(systemName: "fork.knife.circle.fill")
                         .font(.system(size: 80))
                         .foregroundColor(.white.opacity(0.3))
@@ -22,22 +25,24 @@ struct RecipeDetailView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         if let match = recipe.matchPercentage {
                             Text("\(match)% Match")
-                                .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(.mmPrimary)
+                                .font(.caption)
+                                .fontWeight(.bold)
+                                .foregroundColor(MMColor.primary)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
-                                .background(Color.mmPrimaryFixed)
+                                .background(MMColor.primaryFixed)
                                 .clipShape(Capsule())
                         }
                         Text(recipe.name)
-                            .font(.system(size: 26, weight: .black))
+                            .font(.title)
+                            .fontWeight(.black)
                             .foregroundColor(.white)
                     }
                     .padding(20)
                 }
                 .frame(height: 240)
 
-                VStack(spacing: 24) {
+                VStack(spacing: 20) {
                     // Stats Row
                     HStack(spacing: 0) {
                         StatItem(icon: "timer", value: "\(recipe.cookTime)", label: "minutes")
@@ -47,78 +52,86 @@ struct RecipeDetailView: View {
                         StatItem(icon: "flame", value: "\(recipe.calories)", label: "calories")
                     }
                     .padding(.vertical, 16)
-                    .background(Color.mmSurfaceContainerLow)
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .background(MMColor.surfaceContainerLow)
+                    .clipShape(RoundedRectangle(cornerRadius: MMRadius.card))
 
                     // Tags
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 8) {
                             ForEach(recipe.tags, id: \.self) { tag in
                                 Text(tag)
-                                    .font(.system(size: 11, weight: .bold))
-                                    .foregroundColor(.mmOnSurface)
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(MMColor.onBackground)
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
-                                    .background(Color.mmSurfaceContainerLow)
+                                    .background(MMColor.surfaceContainerLow)
                                     .clipShape(Capsule())
                             }
                         }
                     }
 
-                    // Ingredients
+                    // Ingredients Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Ingredients")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.mmOnSurface)
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(MMColor.onBackground)
 
                         ForEach(recipe.ingredients) { ingredient in
                             HStack(spacing: 12) {
                                 Image(systemName: "circle.fill")
                                     .font(.system(size: 6))
-                                    .foregroundColor(.mmPrimary)
+                                    .foregroundColor(MMColor.primary)
                                 Text(ingredient.displayText)
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.mmOnSurface)
+                                    .font(.body)
+                                    .foregroundColor(MMColor.onBackground)
                                 Spacer()
                             }
-                            .padding(.vertical, 6)
+                            .padding(.vertical, 4)
                         }
                     }
 
-                    // Instructions
+                    Divider()
+
+                    // Instructions Section
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Instructions")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.mmOnSurface)
+                            .font(.title3)
+                            .fontWeight(.bold)
+                            .foregroundColor(MMColor.onBackground)
 
                         ForEach(Array(recipe.instructions.enumerated()), id: \.offset) { index, instruction in
                             HStack(alignment: .top, spacing: 14) {
                                 Text("\(index + 1)")
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundColor(.mmPrimary)
+                                    .font(.caption)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(MMColor.primary)
                                     .frame(width: 24, height: 24)
-                                    .background(Color.mmPrimaryFixed)
+                                    .background(MMColor.primaryFixed)
                                     .clipShape(Circle())
                                 Text(instruction)
-                                    .font(.system(size: 15))
-                                    .foregroundColor(.mmOnSurface)
+                                    .font(.body)
+                                    .foregroundColor(MMColor.onBackground)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
-                            .padding(.vertical, 6)
+                            .padding(.vertical, 4)
                         }
                     }
                 }
                 .padding(20)
             }
         }
-        .background(Color.mmBackground)
+        .background(MMColor.background)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: { dismiss() }) {
+                Button {
+                    dismiss()
+                } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundColor(.mmOutline)
+                        .font(.title3)
+                        .foregroundColor(MMColor.outline)
                 }
             }
         }
@@ -133,14 +146,15 @@ struct StatItem: View {
     var body: some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
-                .font(.system(size: 16))
-                .foregroundColor(.mmPrimary)
+                .font(.body)
+                .foregroundColor(MMColor.primary)
             Text(value)
-                .font(.system(size: 17, weight: .bold))
-                .foregroundColor(.mmOnSurface)
+                .font(.headline)
+                .fontWeight(.bold)
+                .foregroundColor(MMColor.onBackground)
             Text(label)
-                .font(.system(size: 11))
-                .foregroundColor(.mmOnSurfaceVariant)
+                .font(.caption)
+                .foregroundColor(MMColor.onSurfaceVariant)
         }
         .frame(maxWidth: .infinity)
     }

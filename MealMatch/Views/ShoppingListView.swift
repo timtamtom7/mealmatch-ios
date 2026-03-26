@@ -2,128 +2,121 @@ import SwiftUI
 
 struct ShoppingListView: View {
     @State private var items: [ShoppingItem] = ShoppingItem.samples
-    @State private var newItemText = ""
+    @State private var newItemName = ""
     @State private var showAddItem = false
 
-    var groupedItems: [String: [ShoppingItem]] {
+    private var groupedItems: [String: [ShoppingItem]] {
         Dictionary(grouping: items) { $0.ingredient.category }
     }
 
-    var sortedCategories: [String] {
+    private var sortedCategories: [String] {
         Ingredient.categories.filter { groupedItems[$0] != nil }
     }
 
+    private var progress: Double {
+        guard !items.isEmpty else { return 0 }
+        return Double(items.filter { $0.isChecked }.count) / Double(items.count)
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: 24) {
+        NavigationStack {
+            List {
                 // Progress Header
-                VStack(spacing: 12) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Shopping List")
-                                .font(.system(size: 22, weight: .black))
-                                .foregroundColor(.mmOnSurface)
-                            Text("\(items.filter { $0.isChecked }.count) of \(items.count) items")
-                                .font(.system(size: 13))
-                                .foregroundColor(.mmOnSurfaceVariant)
-                        }
-                        Spacer()
-                        Image(systemName: "cart.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.mmPrimary)
-                    }
-
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            Rectangle()
-                                .fill(Color.mmSurfaceContainerLow)
-                                .frame(height: 8)
-                                .clipShape(Capsule())
-                            Rectangle()
-                                .fill(Color.mmPrimary)
-                                .frame(width: geo.size.width * progress, height: 8)
-                                .clipShape(Capsule())
-                        }
-                    }
-                    .frame(height: 8)
-                }
-                .padding(20)
-                .background(Color.mmSurfaceContainerLowest)
-                .clipShape(RoundedRectangle(cornerRadius: MMRadius.card))
-                .shadow(color: .black.opacity(0.04), radius: 12, x: 0, y: 4)
-
-                // Categories
-                ForEach(sortedCategories, id: \.self) { category in
-                    VStack(alignment: .leading, spacing: 8) {
+                Section {
+                    VStack(alignment: .leading, spacing: 12) {
                         HStack {
-                            Image(systemName: categoryIcon(for: category))
-                                .foregroundColor(.mmPrimary)
-                            Text(category)
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.mmOnSurface)
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Shopping List")
+                                    .font(.title2)
+                                    .fontWeight(.black)
+                                    .foregroundColor(MMColor.onBackground)
+                                Text("\(items.filter { $0.isChecked }.count) of \(items.count) items")
+                                    .font(.subheadline)
+                                    .foregroundColor(MMColor.onSurfaceVariant)
+                            }
                             Spacer()
-                            Text("\(groupedItems[category]?.filter { $0.isChecked }.count ?? 0)/\(groupedItems[category]?.count ?? 0)")
-                                .font(.system(size: 12, weight: .semibold))
-                                .foregroundColor(.mmOnSurfaceVariant)
+                            Image(systemName: "cart.fill")
+                                .font(.title2)
+                                .foregroundColor(MMColor.primary)
                         }
-                        .padding(.horizontal, 4)
 
-                        VStack(spacing: 0) {
-                            ForEach(groupedItems[category] ?? []) { item in
-                                IngredientRow(item: item) {
-                                    toggleItem(item)
-                                }
-                                if item.id != groupedItems[category]?.last?.id {
-                                    Divider()
-                                        .padding(.leading, 36)
+                        ProgressView(value: progress)
+                            .tint(MMColor.primary)
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                // Grouped Items by Category
+                ForEach(sortedCategories, id: \.self) { category in
+                    Section {
+                        ForEach(groupedItems[category] ?? []) { item in
+                            ShoppingItemRow(item: item) {
+                                toggleItem(item)
+                            }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                Button(role: .destructive) {
+                                    deleteItem(item)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
                             }
                         }
-                        .padding(16)
-                        .background(Color.mmSurfaceContainerLowest)
-                        .clipShape(RoundedRectangle(cornerRadius: MMRadius.card))
-                        .shadow(color: .black.opacity(0.03), radius: 8, x: 0, y: 2)
+                    } header: {
+                        HStack {
+                            Image(systemName: categoryIcon(for: category))
+                                .foregroundColor(MMColor.primary)
+                            Text(category)
+                                .font(.headline)
+                                .foregroundColor(MMColor.onBackground)
+                            Spacer()
+                            Text("\(groupedItems[category]?.filter { $0.isChecked }.count ?? 0)/\(groupedItems[category]?.count ?? 0)")
+                                .font(.caption)
+                                .foregroundColor(MMColor.onSurfaceVariant)
+                        }
                     }
                 }
 
                 // Add Custom Item
-                VStack(spacing: 12) {
-                    HStack(spacing: 12) {
+                Section {
+                    HStack {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 24))
-                            .foregroundColor(.mmPrimary)
-                        Text("Add custom item")
-                            .font(.system(size: 15, weight: .medium))
-                            .foregroundColor(.mmOnSurfaceVariant)
-                        Spacer()
+                            .foregroundColor(MMColor.primary)
+                        TextField("Add custom item...", text: $newItemName)
+                            .textFieldStyle(.plain)
                     }
-                    .padding(20)
-                    .background(Color.mmSurfaceContainerLow.opacity(0.5))
-                    .clipShape(RoundedRectangle(cornerRadius: MMRadius.card))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: MMRadius.card)
-                            .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8]))
-                            .foregroundColor(.mmOutlineVariant.opacity(0.5))
-                    )
+                    .onSubmit {
+                        addItem()
+                    }
                 }
             }
-            .padding(16)
-            .padding(.bottom, 100)
+            .listStyle(.insetGrouped)
+            .tint(MMColor.primary)
+            .background(MMColor.background)
+            .navigationTitle("Shopping")
+            .navigationBarTitleDisplayMode(.large)
         }
-        .background(Color.mmBackground)
-        .navigationTitle("Shopping")
-        .navigationBarHidden(true)
-    }
-
-    private var progress: CGFloat {
-        guard !items.isEmpty else { return 0 }
-        return CGFloat(items.filter { $0.isChecked }.count) / CGFloat(items.count)
     }
 
     private func toggleItem(_ item: ShoppingItem) {
         if let index = items.firstIndex(where: { $0.id == item.id }) {
             items[index].isChecked.toggle()
         }
+    }
+
+    private func deleteItem(_ item: ShoppingItem) {
+        items.removeAll { $0.id == item.id }
+    }
+
+    private func addItem() {
+        guard !newItemName.isEmpty else { return }
+        let newIngredient = Ingredient(
+            name: newItemName,
+            quantity: 1,
+            unit: "item",
+            category: "Pantry"
+        )
+        items.append(ShoppingItem(ingredient: newIngredient))
+        newItemName = ""
     }
 
     private func categoryIcon(for category: String) -> String {
@@ -135,5 +128,43 @@ struct ShoppingListView: View {
         case "Frozen": return "snowflake"
         default: return "circle.fill"
         }
+    }
+}
+
+struct ShoppingItemRow: View {
+    let item: ShoppingItem
+    var onToggle: () -> Void
+
+    var body: some View {
+        Button(action: onToggle) {
+            HStack(spacing: 14) {
+                Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
+                    .font(.title3)
+                    .foregroundColor(item.isChecked ? MMColor.primary : MMColor.outline)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(item.ingredient.name)
+                        .font(.body)
+                        .foregroundColor(item.isChecked ? MMColor.outline : MMColor.onBackground)
+                        .strikethrough(item.isChecked)
+
+                    Text(item.ingredient.unit)
+                        .font(.caption)
+                        .foregroundColor(MMColor.onSurfaceVariant)
+                }
+
+                Spacer()
+
+                Text(item.ingredient.category)
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundColor(MMColor.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(MMColor.secondaryContainer)
+                    .clipShape(Capsule())
+            }
+        }
+        .buttonStyle(.plain)
     }
 }
