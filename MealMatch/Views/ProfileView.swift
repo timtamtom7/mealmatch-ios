@@ -5,6 +5,12 @@ struct ProfileView: View {
     @State private var darkModeEnabled = false
     @State private var weeklyReminders = true
 
+    // TODO: connect to real UserDefaults/CoreData persistence
+    @State private var dayStreak: String = "14"
+    @State private var mealsLogged: String = "42"
+    @State private var recipesMade: String = "28"
+    @State private var avgRating: String = "4.8"
+
     var body: some View {
         NavigationStack {
             Form {
@@ -37,9 +43,9 @@ struct ProfileView: View {
                 // Stats
                 Section {
                     HStack {
-                        StatCard(icon: "flame.fill", value: "14", label: "Day Streak", color: MMColor.primary)
+                        StatCard(icon: "flame.fill", value: dayStreak, label: "Day Streak", color: MMColor.primary)
                         Divider()
-                        StatCard(icon: "fork.knife", value: "42", label: "Meals Logged", color: MMColor.tertiary)
+                        StatCard(icon: "fork.knife", value: mealsLogged, label: "Meals Logged", color: MMColor.tertiary)
                     }
                     .frame(height: 80)
                     .listRowBackground(Color.clear)
@@ -47,9 +53,9 @@ struct ProfileView: View {
                     .padding(.horizontal, 4)
 
                     HStack {
-                        StatCard(icon: "leaf.fill", value: "28", label: "Recipes Made", color: MMColor.primary)
+                        StatCard(icon: "leaf.fill", value: recipesMade, label: "Recipes Made", color: MMColor.primary)
                         Divider()
-                        StatCard(icon: "star.fill", value: "4.8", label: "Avg. Rating", color: MMColor.secondary)
+                        StatCard(icon: "star.fill", value: avgRating, label: "Avg. Rating", color: MMColor.secondary)
                     }
                     .frame(height: 80)
                     .listRowBackground(Color.clear)
@@ -93,11 +99,13 @@ struct ProfileView: View {
                         Label("Notifications", systemImage: "bell.fill")
                     }
                     .tint(MMColor.primary)
+                    .disabled(true) // TODO: implement with UNUserNotificationCenter
 
                     Toggle(isOn: $weeklyReminders) {
                         Label("Weekly Meal Reminders", systemImage: "calendar")
                     }
                     .tint(MMColor.primary)
+                    .disabled(true) // TODO: implement with UNUserNotificationCenter
 
                     Toggle(isOn: $darkModeEnabled) {
                         Label("Dark Mode", systemImage: "moon.fill")
@@ -168,6 +176,8 @@ struct StatCard: View {
                 .foregroundColor(MMColor.onSurfaceVariant)
         }
         .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(label): \(value)")
     }
 }
 
@@ -192,11 +202,12 @@ struct NutritionBar: View {
                     .fill(color)
                     .frame(height: 60 * progress)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: MMRadius.small))
             Text(label)
                 .font(.caption2)
                 .fontWeight(.bold)
                 .foregroundColor(MMColor.onSurfaceVariant)
+                .accessibilityLabel("\(label): \(current) of \(target) \(unit)")
         }
         .frame(maxWidth: .infinity)
     }

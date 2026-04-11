@@ -3,7 +3,16 @@ import SwiftUI
 struct MealPlanView: View {
     @State private var selectedDayIndex = 0
 
-    let days = ["Mon 12", "Tue 13", "Wed 14", "Thu 15", "Fri 16", "Sat 17", "Sun 18"]
+    private var days: [String] = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE d"
+        let calendar = Calendar.current
+        let today = Date()
+        return (0..<7).compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: offset, to: today) else { return nil }
+            return formatter.string(from: date)
+        }
+    }()
 
     var body: some View {
         NavigationStack {
@@ -107,6 +116,8 @@ struct MealPlanView: View {
                             .font(.subheadline)
                             .foregroundColor(MMColor.onSurfaceVariant)
                     }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Ripeness alert: Ingredients expiring soon. Don't let your harvest go to waste. Use your Baby Spinach and Avocado within the next 24 hours.")
                     .padding(20)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(MMColor.surfaceContainerLow)
@@ -148,10 +159,14 @@ struct MealSlotSection: View {
                 EmptyMealSlot()
             } else {
                 ForEach(meals) { meal in
-                    NavigationLink(destination: RecipeDetailView(recipe: Recipe.samples.first!)) {
+                    if let recipe = Recipe.samples.first {
+                        NavigationLink(destination: RecipeDetailView(recipe: recipe)) {
+                            MealCardRow(meal: meal)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
                         MealCardRow(meal: meal)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
@@ -165,7 +180,7 @@ struct MealCardRow: View {
         HStack(spacing: 0) {
             // Image placeholder
             ZStack {
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: MMRadius.medium)
                     .fill(MMColor.primaryFixed.opacity(0.3))
                 Image(systemName: "fork.knife")
                     .font(.title2)
@@ -231,26 +246,31 @@ struct MealCardRow: View {
 
 struct EmptyMealSlot: View {
     var body: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "plus.circle.fill")
-                .font(.largeTitle)
-                .foregroundColor(MMColor.primary)
-            Text("Add a Match")
-                .font(.headline)
-                .foregroundColor(MMColor.onBackground)
-            Text("Find a recipe that perfectly fits your nutritional goals today.")
-                .font(.caption)
-                .foregroundColor(MMColor.onSurfaceVariant)
-                .multilineTextAlignment(.center)
+        Button {
+            // Navigate to recipes tab
+        } label: {
+            VStack(spacing: 10) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.largeTitle)
+                    .foregroundColor(MMColor.primary)
+                Text("Add a Match")
+                    .font(.headline)
+                    .foregroundColor(MMColor.onBackground)
+                Text("Find a recipe that perfectly fits your nutritional goals today.")
+                    .font(.caption)
+                    .foregroundColor(MMColor.onSurfaceVariant)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 160)
+            .background(MMColor.surfaceContainerLow.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: MMRadius.card))
+            .overlay(
+                RoundedRectangle(cornerRadius: MMRadius.card)
+                    .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8]))
+                    .foregroundColor(MMColor.outline.opacity(0.3))
+            )
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 160)
-        .background(MMColor.surfaceContainerLow.opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: MMRadius.card))
-        .overlay(
-            RoundedRectangle(cornerRadius: MMRadius.card)
-                .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8]))
-                .foregroundColor(MMColor.outline.opacity(0.3))
-        )
+        .buttonStyle(.plain)
     }
 }

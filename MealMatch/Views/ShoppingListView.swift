@@ -42,6 +42,8 @@ struct ShoppingListView: View {
 
                         ProgressView(value: progress)
                             .tint(MMColor.primary)
+                            .accessibilityLabel("Shopping list progress: \(items.filter { $0.isChecked }.count) of \(items.count) items")
+                            .accessibilityValue("\(Int(progress * 100)) percent complete")
                     }
                     .padding(.vertical, 4)
                 }
@@ -60,6 +62,7 @@ struct ShoppingListView: View {
                                     Label("Delete", systemImage: "trash")
                                 }
                             }
+                            .accessibilityHint("Swipe left to delete this item")
                         }
                     } header: {
                         HStack {

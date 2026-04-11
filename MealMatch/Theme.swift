@@ -1,6 +1,6 @@
 import SwiftUI
 
-// MARK: - Design Tokens (Stitch)
+// MARK: - Design Tokens (MealMatch)
 enum MMColor {
     static let primary = Color(hex: "466729")        // #466729 green
     static let tertiary = Color(hex: "B12C16")       // #B12C16 orange/red
@@ -35,4 +35,16 @@ extension Color {
 
 enum MMRadius {
     static let card: CGFloat = 16
+    static let medium: CGFloat = 12
+    static let small: CGFloat = 8
+    static let tag: CGFloat = 6
+}
+
+enum MMSpacing {
+    static let xs: CGFloat = 4
+    static let sm: CGFloat = 8
+    static let md: CGFloat = 12
+    static let lg: CGFloat = 16
+    static let xl: CGFloat = 20
+    static let xxl: CGFloat = 24
 }

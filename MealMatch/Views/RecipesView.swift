@@ -31,6 +31,7 @@ struct RecipesView: View {
                             .font(.subheadline)
                             .fontWeight(.bold)
                             .foregroundColor(MMColor.primary)
+                            .opacity(0.5) // TODO: wire to filter/navigation action
                     }
 
                     // Recipe Grid
@@ -95,7 +96,7 @@ struct RecipeCardGrid: View {
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
                 .background(.ultraThinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .clipShape(RoundedRectangle(cornerRadius: MMRadius.medium))
                 .padding(10)
             }
             .frame(height: 140)
@@ -116,7 +117,7 @@ struct RecipeCardGrid: View {
                             .padding(.horizontal, 6)
                             .padding(.vertical, 3)
                             .background(MMColor.surfaceContainerLow)
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                            .clipShape(RoundedRectangle(cornerRadius: MMRadius.tag))
                     }
                 }
 

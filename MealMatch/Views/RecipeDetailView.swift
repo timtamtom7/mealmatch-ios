@@ -113,7 +113,7 @@ struct RecipeDetailView: View {
                                 Text(instruction)
                                     .font(.body)
                                     .foregroundColor(MMColor.onBackground)
-                                    .fixedSize(horizontal: false, vertical: true)
+                                    .lineLimit(4)
                             }
                             .padding(.vertical, 4)
                         }
@@ -125,6 +125,13 @@ struct RecipeDetailView: View {
         .background(MMColor.background)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                ShareLink(item: recipe.name, subject: Text("MealMatch Recipe"), message: Text("Check out this recipe: \(recipe.name) — \(recipe.cookTime) min, \(recipe.calories) kcal")) {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.title3)
+                        .foregroundColor(MMColor.outline)
+                }
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     dismiss()
